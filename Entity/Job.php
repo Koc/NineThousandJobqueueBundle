@@ -27,14 +27,6 @@ use DateTime;
  */
 class Job
 {
-    public function __construct()
-    {
-        $this->args = new ArrayCollection();
-        $this->params = new ArrayCollection();
-        $this->tags = new ArrayCollection();
-        $this->history = new ArrayCollection();
-    }
-
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")
@@ -50,22 +42,22 @@ class Job
     /**
      * @ORM\Column(type="integer")
      */
-    protected $retry = 0;
+    protected $retry;
 
     /**
      * @ORM\Column(type="integer")
      */
-    protected $cooldown = 0;
+    protected $cooldown;
 
     /**
      * @ORM\Column(name="max_retries", type="integer")
      */
-    protected $maxRetries = 0;
+    protected $maxRetries;
 
     /**
      * @ORM\Column(type="integer")
      */
-    protected $attempts = 0;
+    protected $attempts;
 
     /**
      * @ORM\Column(nullable="true", type="text")
@@ -95,7 +87,7 @@ class Job
     /**
      * @ORM\Column(type="integer")
      */
-    protected $active = 0;
+    protected $active;
 
     /**
      * @ORM\Column(nullable="true", type="string")
@@ -103,9 +95,10 @@ class Job
     protected $schedule;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\ManyToOne(tagetEntity="Job")
+     * @ORM\JoinColumn(name="parent", referencedColumnName="id", nullable="true")
      */
-    protected $parent = 0;
+    protected $parent;
 
     /**
      * @ORM\OneToMany(targetEntity="Param", mappedBy="job", cascade={"persist", "remove"}, orphanRemoval=true)
@@ -131,6 +124,24 @@ class Job
      */
     protected $history;
 
+    public function __construct()
+    {
+        $this->args = new ArrayCollection();
+        $this->params = new ArrayCollection();
+        $this->tags = new ArrayCollection();
+        $this->history = new ArrayCollection();
+
+        $this->retry = 0;
+        $this->cooldown = 0;
+        $this->maxRetries = 0;
+        $this->attempts = 0;
+        $this->status = null;
+        $this->createDate = new DateTime();
+        $this->lastrunDate = null;
+        $this->active = 0;
+        $this->schedule = null;
+        $this->parent = null;
+    }
 
     /**
      * @return int
@@ -333,7 +344,7 @@ class Job
     }
 
     /**
-     * @return int
+     * @return Job
      */
     public function getParent()
     {
@@ -341,9 +352,9 @@ class Job
     }
 
     /**
-     * @param int $parent
+     * @param Job $parent
      */
-    public function setParent($parent)
+    public function setParent(Job $parent = null)
     {
         $this->parent = $parent;
     }

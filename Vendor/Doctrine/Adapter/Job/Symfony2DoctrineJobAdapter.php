@@ -72,7 +72,7 @@ class Symfony2DoctrineJobAdapter implements JobAdapterInterface
 
         }
 
-        $this->adapterClass = new $adapterClass;
+        $this->adapterClass = new $adapterClass();
         $this->adapterClass->setLogger($this->logger);
     }
 
@@ -83,19 +83,15 @@ class Symfony2DoctrineJobAdapter implements JobAdapterInterface
      */
     public function spawn()
     {
-        $entity = new JobEntity;
+        $entity = new JobEntity();
         $entity->setRetry($this->jobEntity->getRetry());
         $entity->setCooldown($this->jobEntity->getCooldown());
         $entity->setMaxRetries($this->jobEntity->getMaxRetries());
-        $entity->setAttempts(0);
         $entity->setExecutable($this->jobEntity->getExecutable());
         $entity->setType($this->jobEntity->getType());
-        $entity->setStatus(null);
-        $entity->setCreateDate(new \DateTime("now"));
-        $entity->setLastRunDate(null);
+        $entity->setParent($this->jobEntity);
+
         $entity->setActive(1);
-        $entity->setSchedule(null);
-        $entity->setParent($this->jobEntity->getId());
         $this->em->persist($entity);
         $this->em->flush();
 
@@ -346,10 +342,10 @@ class Symfony2DoctrineJobAdapter implements JobAdapterInterface
 
         //create new params
         foreach ($params as $key => $value) {
-            $param = new Param;
+            $param = new Param();
             $param->setKey($key);
             $param->setValue($value);
-            $param->setJob($this->getId());
+            $param->setJob($this->jobEntity);
             $param->setActive(1);
             $this->em->persist($param);
         }
@@ -383,9 +379,9 @@ class Symfony2DoctrineJobAdapter implements JobAdapterInterface
 
         //create new params
         foreach ($args as $value) {
-            $arg = new Arg;
+            $arg = new Arg();
             $arg->setValue($value);
-            $arg->setJob($this->getId());
+            $arg->setJob($this->jobEntity);
             $arg->setActive(1);
             $this->em->persist($arg);
         }
@@ -419,9 +415,9 @@ class Symfony2DoctrineJobAdapter implements JobAdapterInterface
 
         //create new params
         foreach ($tags as $value) {
-            $tag = new Tag;
+            $tag = new Tag();
             $tag->setValue($value);
-            $tag->setJob($this->getId());
+            $tag->setJob($this->jobEntity);
             $tag->setActive(1);
             $this->em->persist($tag);
         }
@@ -455,7 +451,7 @@ class Symfony2DoctrineJobAdapter implements JobAdapterInterface
     public function addHistory(array $result)
     {
         //add a history entry
-        $history = new History;
+        $history = new History();
         $history->setJob($this->jobEntity);
         $history->setTimestamp($this->getLastrunDate());
         $history->setStatus($result['status']);

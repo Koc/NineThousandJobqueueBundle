@@ -34,7 +34,7 @@ class JobController extends Controller
         $query['scheduled'] = $this->getRequest()->query->get('scheduled') ?: null;
         $query['reverse'] = $this->getRequest()->query->get('reverse') ?: null;
         $query['offset'] = ($query['limit'] * $query['page']) - $query['limit'];
-        
+
         $em = $this->getDoctrine()->getEntityManager();
 
         $result = $em->getRepository('NineThousandJobqueueBundle:Job')->findAllByQuery($query);
@@ -47,7 +47,7 @@ class JobController extends Controller
             $forms[$id]['activate_form'] = $this->createActivateForm()->createView();
             $forms[$id]['retry_form'] = $this->createRetryForm()->createView();
         }
-        
+
         return $this->render('NineThousandJobqueueBundle:Job:index.html.twig', array(
             'entities'    => $result['entities'],
             'forms'       => $forms,
@@ -99,7 +99,7 @@ class JobController extends Controller
             'action' => $this->generateUrl('jobqueue_job_create'),
         ));
     }
-    
+
     /**
      * Creates a new Job entity.
      *
@@ -111,13 +111,13 @@ class JobController extends Controller
         $form    = $this->createForm(new JobType(), $entity, $this->container->getParameter('jobqueue.adapter.options'));
 
         if ('POST' === $request->getMethod()) {
-            
+
             $this->sanitizeCollections($form, $request, array(
                 'params' => array('key','value'),
                 'args'   => array('value'),
                 'tags'   => array('value'),
             ));
-            
+
             $form->bindRequest($request);
 
             if ($form->isValid()) {
@@ -126,7 +126,6 @@ class JobController extends Controller
                     'params' => 'job',
                     'args'   => 'job',
                 ));
-                $entity->setCreateDate(new \DateTime);
                 $entity->setActive(1);
                 $em->persist($entity);
                 $em->flush();
@@ -134,7 +133,7 @@ class JobController extends Controller
                 return $this->redirect($this->generateUrl('jobqueue_job_show', array(
                     'id' => $entity->getId(),
                 )));
-                
+
             }
         }
 
@@ -162,11 +161,11 @@ class JobController extends Controller
         if (count($entity->getParams()) < 1) {
             $entity->setParams(array(new Param()));
         }
-        
+
         if (count($entity->getArgs()) < 1) {
             $entity->setArgs(array(new Arg()));
         }
-        
+
         if (count($entity->getTags()) < 1) {
             $entity->setTags(array(new Tag()));
         }
@@ -195,7 +194,7 @@ class JobController extends Controller
         $em = $this->getDoctrine()->getEntityManager();
 
         $entity = $em->getRepository('NineThousandJobqueueBundle:Job')->find($id);
-        
+
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find Job entity.');
         }
@@ -213,7 +212,7 @@ class JobController extends Controller
                 'args'   => array('value'),
                 'tags'   => array('value'),
             ));
-            
+
             $form->bindRequest($request);
 
             if ($form->isValid()) {
@@ -222,7 +221,6 @@ class JobController extends Controller
                     'params' => 'job',
                     'args'   => 'job',
                 ));
-                $em->persist($entity);
                 $em->flush();
 
                 return $this->redirect($this->generateUrl('jobqueue_job_edit', array('id' => $id)));
@@ -258,7 +256,7 @@ class JobController extends Controller
                 if (!$entity) {
                     throw $this->createNotFoundException('Unable to find Job entity.');
                 }
-                
+
                 $entity->setActive(0);
                 $entity->setRetry(0);
                 $entity->setSchedule(NULL);
@@ -276,7 +274,7 @@ class JobController extends Controller
             ->getForm()
         ;
     }
-    
+
     /**
      * Makes a Job entity active.
      *
@@ -296,7 +294,7 @@ class JobController extends Controller
                 if (!$entity) {
                     throw $this->createNotFoundException('Unable to find Job entity.');
                 }
-                
+
                 $entity->setActive(1);
                 $entity->setStatus(NULL);
                 $em->persist($entity);
@@ -313,7 +311,7 @@ class JobController extends Controller
             ->getForm()
         ;
     }
-    
+
     /**
      * Queues a job entity for a single retry.
      *
@@ -354,7 +352,7 @@ class JobController extends Controller
             ->getForm()
         ;
     }
-    
+
     /**
      * Removes submitted errant form fields
      * @param Symfony\Component\Form\Form $form
@@ -377,7 +375,7 @@ class JobController extends Controller
         }
         $request->request->set($formName, $submission);
     }
-    
+
     /**
      * Populates the inverse of bidirectional collection relationships
      * @param Obj $entity
@@ -393,15 +391,15 @@ class JobController extends Controller
             }
         }
     }
-    
+
     public function getPagination($query, $options, $total, $param) {
-        
+
         $pages = array();
         $current = $query['page'];
         unset($query['page']);
         unset($query['offset']);
         unset($query['limit']);
-        
+
         $query = ($query = http_build_query($query)) ? '&'.$query : '';
         $pCount = floor($total / $options['limit']);
         if ($remainder = $total % $options['limit']) {
@@ -412,7 +410,7 @@ class JobController extends Controller
         for ($i=$start;$i<=$end;$i++) {
            array_push($pages, $i);
         }
-        
+
         return array(
             'current'   => $current,
             'pages'     => $pages,

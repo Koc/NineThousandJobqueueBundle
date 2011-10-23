@@ -54,7 +54,7 @@ class Arg
     }
 
     /**
-     * @return int
+     * @return Job
      */
     public function getJob()
     {
@@ -62,9 +62,9 @@ class Arg
     }
 
     /**
-     * @param int $job
+     * @param Job $job
      */
-    public function setJob($job)
+    public function setJob(Job $job)
     {
         $this->job = $job;
     }
